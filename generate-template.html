@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Generate Template</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<script>
+// This page auto-generates and downloads the Excel template when opened
+window.onload = function() {
+  const headers = [
+    'studentName', 'paradigmId', 'grade', 'section',
+    'dispersalMode', 'busRoute', 'pickupName', 'parentContact',
+    'sibling', 'walkUndertaking', 'emergencyContact'
+  ];
+
+  const samples = [
+    ['Ahmed Al Rashid', 'PAR-00001', 'G5', 'A', 'School Bus', 'Bus 3', 'Parent', '+971501234567', 'Yes', 'No', '+971502345678'],
+    ['Fatima Hassan', 'PAR-00002', 'KG1', 'B', 'Own Transport', '', 'Car Lift', '+971503456789', 'No', 'No', '+971504567890'],
+    ['Omar Al Mansoori', 'PAR-00003', 'G8', 'AB', 'By Walk', '', '', '+971505678901', 'Yes', 'Yes', '+971506789012'],
+    ['Sara Khalid', 'PAR-00004', 'G11', 'AG', 'School Bus', 'Route B', 'Driver', '+971507890123', 'No', 'No', '+971508901234'],
+  ];
+
+  // Column info sheet
+  const info = [
+    ['Field', 'Required', 'Valid Values', 'Example'],
+    ['studentName', 'YES', 'Any text', 'Ahmed Al Rashid'],
+    ['paradigmId', 'No', 'Any text', 'PAR-00001'],
+    ['grade', 'YES', 'KG1, KG2, G1, G2, G3, G4, G5, G6, G7, G8, G9, G10, G11, G12', 'G5'],
+    ['section', 'YES', 'A, B, C, D, E, F, AB, BB, CB, DB, AG, BG, CG, DG', 'A'],
+    ['dispersalMode', 'YES', 'School Bus | Own Transport | By Walk', 'School Bus'],
+    ['busRoute', 'No', 'Any text', 'Bus 3 / Route A'],
+    ['pickupName', 'No', 'Parent | Car Lift | Driver | Guardian | Sibling | Other', 'Parent'],
+    ['parentContact', 'No', 'Phone number', '+971501234567'],
+    ['sibling', 'No', 'Yes | No', 'Yes'],
+    ['walkUndertaking', 'No', 'Yes | No', 'Yes'],
+    ['emergencyContact', 'No', 'Phone number', '+971502345678'],
+  ];
+
+  const wb = XLSX.utils.book_new();
+
+  // Students sheet
+  const ws1 = XLSX.utils.aoa_to_sheet([headers, ...samples]);
+  ws1['!cols'] = headers.map(() => ({ wch: 22 }));
+  XLSX.utils.book_append_sheet(wb, ws1, 'Students');
+
+  // Info sheet
+  const ws2 = XLSX.utils.aoa_to_sheet(info);
+  ws2['!cols'] = [{ wch: 22 }, { wch: 10 }, { wch: 60 }, { wch: 25 }];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Field Guide');
+
+  XLSX.writeFile(wb, 'student_import_template.xlsx');
+  document.body.innerHTML = '<p style="font-family:sans-serif;padding:2rem">✅ Template downloaded! You can close this page.</p>';
+};
+</script>
+</body>
+</html>

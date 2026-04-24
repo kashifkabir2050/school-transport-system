@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — School Transport</title>
+<link rel="stylesheet" href="css/style.css">
+<!-- jsPDF for PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+<style>
+.report-scope-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem;
+}
+.scope-btn {
+  padding: 8px 20px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--bg-white); font-weight: 500; font-size: 0.875rem; cursor: pointer;
+  transition: all 0.18s; color: var(--text);
+}
+.scope-btn:hover { border-color: var(--primary-mid); color: var(--primary); }
+.scope-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+.report-section { margin-bottom: 2rem; }
+.report-section h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; color: var(--text);
+  display: flex; align-items: center; gap: 8px; }
+.summary-row { display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-radius: 8px; background: var(--bg); margin-bottom: 6px;
+  font-size: 0.875rem; }
+.summary-row strong { font-weight: 700; font-size: 1rem; color: var(--primary); }
+.report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+@media (max-width: 768px) { .report-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top-nav">
+  <div class="nav-brand">
+    <div class="logo-icon">🚌</div>
+    <span>School Transport</span>
+  </div>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="students.html">Students</a>
+    <a href="reports.html" class="active">Reports</a>
+  </div>
+  <div class="nav-user">
+    <div class="avatar" id="user-avatar">A</div>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Reports</h1>
+      <p class="page-subtitle">Dispersal analytics — grade, section, cycle, and whole school</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary" onclick="exportCurrentCSV()">⬇ Export CSV</button>
+      <button class="btn btn-primary" onclick="downloadPDF()">📄 Download PDF</button>
+    </div>
+  </div>
+
+  <!-- Scope Selector -->
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px;">Report Scope</div>
+    <div class="report-scope-bar">
+      <button class="scope-btn active" data-scope="school" onclick="setScope('school')">🏫 Whole School</button>
+      <button class="scope-btn" data-scope="kindergarten" onclick="setScope('kindergarten')">🌱 Kindergarten</button>
+      <button class="scope-btn" data-scope="primary" onclick="setScope('primary')">📚 Primary</button>
+      <button class="scope-btn" data-scope="middle" onclick="setScope('middle')">🏫 Middle</button>
+      <button class="scope-btn" data-scope="higher" onclick="setScope('higher')">🎓 Higher</button>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;" id="grade-filter-row">
+      <select class="form-control" style="width:auto;" id="grade-filter" onchange="renderReports()">
+        <option value="">All Grades</option>
+      </select>
+      <select class="form-control" style="width:auto;" id="section-filter" onchange="renderReports()">
+        <option value="">All Sections</option>
+        <option>A</option><option>B</option><option>C</option><option>D</option>
+        <option>E</option><option>F</option><option>AB</option><option>BB</option>
+        <option>CB</option><option>DB</option><option>AG</option><option>BG</option>
+        <option>CG</option><option>DG</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Report Cards -->
+  <div id="loading-state" style="text-align:center;padding:3rem;color:var(--text-muted);">Loading data…</div>
+  <div id="reports-content" style="display:none;">
+
+    <!-- Summary Stats -->
+    <div class="stats-grid" id="report-stats"></div>
+
+    <div class="report-grid">
+      <!-- Dispersal Mode Breakdown -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="icon">🚌</div> Dispersal Mode</div>
+        </div>
+        <div id="mode-report"></div>
+      </div>
+
+      <!-- Sibling Report -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="icon">👫</div> Sibling Status</div>
+        </div>
+        <div id="sibling-report"></div>
+      </div>
+
+      <!-- Walk Consent -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="icon">🚶</div> Walk Consent (By Walk students)</div>
+        </div>
+        <div id="consent-report"></div>
+      </div>
+
+      <!-- By Grade -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="icon">📊</div> Students by Grade</div>
+        </div>
+        <div id="grade-report"></div>
+      </div>
+    </div>
+
+    <!-- Section Breakdown Table -->
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="card-header">
+        <div class="card-title"><div class="icon">📋</div> Section Breakdown</div>
+      </div>
+      <div class="table-wrap" id="section-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Total</th>
+              <th>School Bus</th>
+              <th>Own Transport</th>
+              <th>By Walk</th>
+              <th>Siblings</th>
+              <th>Walk Consent</th>
+            </tr>
+          </thead>
+          <tbody id="section-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Detailed Student List -->
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="card-header">
+        <div class="card-title"><div class="icon">👥</div> Student List</div>
+        <span class="badge badge-blue" id="report-count">0</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Paradigm ID</th><th>Grade</th><th>Section</th>
+              <th>Mode</th><th>Bus/Route</th><th>Pick-up</th><th>Sibling</th><th>Walk Consent</th>
+            </tr>
+          </thead>
+          <tbody id="detail-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /reports-content -->
+</div>
+
+<div id="toast-container"></div>
+
+<script type="module">
+import { db, auth, collection, getDocs, onAuthStateChanged, signOut } from './js/firebase-config.js';
+
+const CYCLE_MAP = {
+  KG1:'kindergarten',KG2:'kindergarten',
+  G1:'primary',G2:'primary',G3:'primary',G4:'primary',G5:'primary',
+  G6:'middle',G7:'middle',G8:'middle',
+  G9:'higher',G10:'higher',G11:'higher',G12:'higher'
+};
+const CYCLE_GRADES = {
+  kindergarten:['KG1','KG2'],
+  primary:['G1','G2','G3','G4','G5'],
+  middle:['G6','G7','G8'],
+  higher:['G9','G10','G11','G12']
+};
+
+let allStudents = [];
+let currentScope = 'school';
+let scopedStudents = [];
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  document.getElementById('user-avatar').textContent = user.email[0].toUpperCase();
+  const snap = await getDocs(collection(db, 'students'));
+  allStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('reports-content').style.display = 'block';
+  renderReports();
+});
+
+window.doLogout = async () => { await signOut(auth); window.location.href = 'login.html'; };
+
+window.setScope = function(scope) {
+  currentScope = scope;
+  document.querySelectorAll('.scope-btn').forEach(b => b.classList.toggle('active', b.dataset.scope === scope));
+
+  // Update grade filter options
+  const gradeSelect = document.getElementById('grade-filter');
+  gradeSelect.innerHTML = '<option value="">All Grades</option>';
+  const grades = scope === 'school' ? Object.values(CYCLE_GRADES).flat() : (CYCLE_GRADES[scope] || []);
+  grades.forEach(g => { const o = document.createElement('option'); o.value = g; o.textContent = g; gradeSelect.appendChild(o); });
+
+  renderReports();
+};
+
+window.renderReports = function() {
+  const gradeFilter = document.getElementById('grade-filter').value;
+  const sectionFilter = document.getElementById('section-filter').value;
+
+  scopedStudents = allStudents.filter(s => {
+    if (currentScope !== 'school' && CYCLE_MAP[s.grade] !== currentScope) return false;
+    if (gradeFilter && s.grade !== gradeFilter) return false;
+    if (sectionFilter && s.section !== sectionFilter) return false;
+    return true;
+  });
+
+  const total = scopedStudents.length;
+  const bus = scopedStudents.filter(s => s.dispersalMode === 'School Bus').length;
+  const own = scopedStudents.filter(s => s.dispersalMode === 'Own Transport').length;
+  const walk = scopedStudents.filter(s => s.dispersalMode === 'By Walk').length;
+  const sib = scopedStudents.filter(s => s.sibling === 'Yes').length;
+  const consent = scopedStudents.filter(s => s.walkUndertaking === 'Yes').length;
+
+  // Stats
+  document.getElementById('report-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total Students</div></div>
+    <div class="stat-card info"><div class="stat-num">${bus}</div><div class="stat-label">School Bus</div></div>
+    <div class="stat-card accent"><div class="stat-num">${own}</div><div class="stat-label">Own Transport</div></div>
+    <div class="stat-card"><div class="stat-num">${walk}</div><div class="stat-label">By Walk</div></div>
+    <div class="stat-card danger"><div class="stat-num">${sib}</div><div class="stat-label">Have Siblings</div></div>
+    <div class="stat-card"><div class="stat-num">${consent}</div><div class="stat-label">Walk Consent</div></div>
+  `;
+
+  // Mode chart
+  const maxMode = Math.max(bus, own, walk, 1);
+  document.getElementById('mode-report').innerHTML = `
+    <div class="bar-chart">
+      ${barRow('School Bus', bus, maxMode, 'info')}
+      ${barRow('Own Transport', own, maxMode, 'accent')}
+      ${barRow('By Walk', walk, maxMode, '')}
+    </div>
+    <div style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);">
+      ${total ? `Bus: ${pct(bus,total)}% · Own: ${pct(own,total)}% · Walk: ${pct(walk,total)}%` : 'No data'}
+    </div>
+  `;
+
+  // Sibling report
+  const noSib = scopedStudents.filter(s => s.sibling === 'No').length;
+  const maxSib = Math.max(sib, noSib, 1);
+  document.getElementById('sibling-report').innerHTML = `
+    <div class="bar-chart">
+      ${barRow('Has Sibling', sib, maxSib, '')}
+      ${barRow('No Sibling', noSib, maxSib, 'info')}
+    </div>
+    <div style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);">
+      Sibling rate: ${total ? pct(sib,total) : 0}%
+    </div>
+  `;
+
+  // Walk consent (only By Walk students)
+  const walkStudents = scopedStudents.filter(s => s.dispersalMode === 'By Walk');
+  const consentYes = walkStudents.filter(s => s.walkUndertaking === 'Yes').length;
+  const consentNo = walkStudents.filter(s => s.walkUndertaking === 'No').length;
+  const maxCon = Math.max(consentYes, consentNo, 1);
+  document.getElementById('consent-report').innerHTML = walkStudents.length ? `
+    <div class="bar-chart">
+      ${barRow('Consent: Yes', consentYes, maxCon, '')}
+      ${barRow('Consent: No', consentNo, maxCon, 'danger')}
+    </div>
+    <div style="margin-top:1rem;font-size:0.8rem;color:var(--text-muted);">
+      ${walkStudents.length} walk students · ${pct(consentYes, walkStudents.length)}% consent given
+    </div>
+  ` : '<div style="color:var(--text-muted);font-size:0.875rem;padding:1rem 0;">No "By Walk" students in this scope.</div>';
+
+  // Grade breakdown
+  const gradeKeys = currentScope === 'school'
+    ? Object.values(CYCLE_GRADES).flat()
+    : (CYCLE_GRADES[currentScope] || []);
+  const gradeData = gradeKeys.map(g => ({ g, cnt: scopedStudents.filter(s => s.grade === g).length })).filter(x => x.cnt > 0);
+  const maxGrade = Math.max(...gradeData.map(x=>x.cnt), 1);
+  document.getElementById('grade-report').innerHTML = gradeData.length ? `
+    <div class="bar-chart">${gradeData.map(x => barRow(x.g, x.cnt, maxGrade, '')).join('')}</div>
+  ` : '<div style="color:var(--text-muted);font-size:0.875rem;padding:1rem 0;">No data.</div>';
+
+  // Section table
+  const sections = [...new Set(scopedStudents.map(s => s.section).filter(Boolean))].sort();
+  document.getElementById('section-tbody').innerHTML = sections.map(sec => {
+    const ss = scopedStudents.filter(s => s.section === sec);
+    return `<tr>
+      <td style="font-weight:600">${sec}</td>
+      <td style="font-weight:700;color:var(--primary)">${ss.length}</td>
+      <td>${ss.filter(s=>s.dispersalMode==='School Bus').length}</td>
+      <td>${ss.filter(s=>s.dispersalMode==='Own Transport').length}</td>
+      <td>${ss.filter(s=>s.dispersalMode==='By Walk').length}</td>
+      <td>${ss.filter(s=>s.sibling==='Yes').length}</td>
+      <td>${ss.filter(s=>s.walkUndertaking==='Yes').length}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--text-muted);">No data</td></tr>`;
+
+  // Detail table
+  document.getElementById('report-count').textContent = `${total} students`;
+  const modeCls = { 'School Bus':'badge-blue', 'Own Transport':'badge-orange', 'By Walk':'badge-green' };
+  document.getElementById('detail-tbody').innerHTML = scopedStudents.map((s,i) => `
+    <tr>
+      <td style="color:var(--text-muted);font-size:0.8rem">${i+1}</td>
+      <td style="font-weight:500">${s.studentName||'—'}</td>
+      <td style="font-size:0.8rem;color:var(--text-muted)">${s.paradigmId||'—'}</td>
+      <td><span class="badge badge-gray" style="font-size:0.7rem">${s.grade||'—'}</span></td>
+      <td>${s.section||'—'}</td>
+      <td><span class="badge ${modeCls[s.dispersalMode]||'badge-gray'}" style="font-size:0.7rem">${s.dispersalMode||'—'}</span></td>
+      <td style="font-size:0.8rem">${s.busRoute||'—'}</td>
+      <td style="font-size:0.8rem">${s.pickupName||'—'}</td>
+      <td>${s.sibling==='Yes'?'<span class="badge badge-green" style="font-size:0.7rem">Yes</span>':'<span class="badge badge-gray" style="font-size:0.7rem">No</span>'}</td>
+      <td>${s.walkUndertaking==='Yes'?'<span class="badge badge-green" style="font-size:0.7rem">Yes</span>':'<span class="badge badge-red" style="font-size:0.7rem">No</span>'}</td>
+    </tr>
+  `).join('') || `<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--text-muted);">No students match current filter.</td></tr>`;
+};
+
+function barRow(label, val, maxVal, cls) {
+  const w = maxVal > 0 ? (val/maxVal*100).toFixed(1) : 0;
+  return `<div class="bar-row">
+    <div class="bar-label">${label}</div>
+    <div class="bar-track">
+      <div class="bar-fill ${cls}" style="width:${w}%"><span>${val}</span></div>
+    </div>
+  </div>`;
+}
+function pct(a,b) { return b ? Math.round(a/b*100) : 0; }
+
+// ===== CSV EXPORT =====
+window.exportCurrentCSV = function() {
+  if (!scopedStudents.length) { showToast('No data to export.', 'info'); return; }
+  const headers = ['studentName','paradigmId','grade','section','cycle','dispersalMode','busRoute','pickupName','parentContact','sibling','walkUndertaking','emergencyContact'];
+  const rows = scopedStudents.map(s => headers.map(h => `"${(s[h]||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `transport_report_${currentScope}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported!', 'success');
+};
+
+// ===== PDF EXPORT =====
+window.downloadPDF = function() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  const scopeLabel = { school:'Whole School', kindergarten:'Kindergarten', primary:'Primary', middle:'Middle', higher:'Higher' }[currentScope];
+  const date = new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
+  const total = scopedStudents.length;
+  const bus = scopedStudents.filter(s=>s.dispersalMode==='School Bus').length;
+  const own = scopedStudents.filter(s=>s.dispersalMode==='Own Transport').length;
+  const walk = scopedStudents.filter(s=>s.dispersalMode==='By Walk').length;
+  const sib = scopedStudents.filter(s=>s.sibling==='Yes').length;
+  const consent = scopedStudents.filter(s=>s.walkUndertaking==='Yes').length;
+
+  // Header
+  pdf.setFillColor(26,107,74);
+  pdf.rect(0,0,297,18,'F');
+  pdf.setTextColor(255,255,255);
+  pdf.setFontSize(13); pdf.setFont(undefined,'bold');
+  pdf.text('School Transport System — Dispersal Report', 14, 12);
+  pdf.setFontSize(9); pdf.setFont(undefined,'normal');
+  pdf.text(`Scope: ${scopeLabel}  |  Generated: ${date}  |  Total Students: ${total}`, 14, 17);
+
+  pdf.setTextColor(0,0,0);
+
+  // Summary boxes
+  pdf.setFontSize(9);
+  const boxes = [
+    {label:'Total Students', val:total, x:14},
+    {label:'School Bus', val:bus, x:62},
+    {label:'Own Transport', val:own, x:110},
+    {label:'By Walk', val:walk, x:158},
+    {label:'With Siblings', val:sib, x:206},
+    {label:'Walk Consent', val:consent, x:254},
+  ];
+  boxes.forEach(b => {
+    pdf.setFillColor(232,245,239);
+    pdf.roundedRect(b.x, 23, 43, 18, 2, 2, 'F');
+    pdf.setFont(undefined,'bold'); pdf.setFontSize(14); pdf.setTextColor(26,107,74);
+    pdf.text(String(b.val), b.x+21.5, 34, {align:'center'});
+    pdf.setFont(undefined,'normal'); pdf.setFontSize(7); pdf.setTextColor(107,124,114);
+    pdf.text(b.label, b.x+21.5, 39, {align:'center'});
+  });
+
+  pdf.setTextColor(0,0,0);
+
+  // Sections table
+  const sections = [...new Set(scopedStudents.map(s=>s.section).filter(Boolean))].sort();
+  const sectionData = sections.map(sec => {
+    const ss = scopedStudents.filter(s=>s.section===sec);
+    return [sec, ss.length, ss.filter(s=>s.dispersalMode==='School Bus').length,
+      ss.filter(s=>s.dispersalMode==='Own Transport').length, ss.filter(s=>s.dispersalMode==='By Walk').length,
+      ss.filter(s=>s.sibling==='Yes').length, ss.filter(s=>s.walkUndertaking==='Yes').length];
+  });
+
+  if (sectionData.length) {
+    pdf.setFontSize(10); pdf.setFont(undefined,'bold');
+    pdf.text('Section Breakdown', 14, 49);
+    pdf.autoTable({
+      startY: 52,
+      head: [['Section','Total','School Bus','Own Transport','By Walk','Siblings','Walk Consent']],
+      body: sectionData,
+      theme: 'grid',
+      headStyles: { fillColor: [26,107,74], textColor: [255,255,255], fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
+      columnStyles: { 0: {fontStyle:'bold'} },
+      margin: { left: 14, right: 14 }
+    });
+  }
+
+  // Student detail table
+  const tableData = scopedStudents.map((s,i) => [
+    i+1, s.studentName||'', s.paradigmId||'', s.grade||'', s.section||'',
+    s.dispersalMode||'', s.busRoute||'', s.sibling||'', s.walkUndertaking||''
+  ]);
+
+  if (tableData.length) {
+    const finalY = pdf.lastAutoTable?.finalY || 48;
+    pdf.setFontSize(10); pdf.setFont(undefined,'bold');
+    pdf.text('Student Detail List', 14, finalY + 8);
+    pdf.autoTable({
+      startY: finalY + 11,
+      head: [['#','Name','Paradigm ID','Grade','Section','Dispersal Mode','Bus/Route','Sibling','Walk Consent']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [26,107,74], textColor: [255,255,255], fontSize: 7 },
+      bodyStyles: { fontSize: 7 },
+      columnStyles: { 0:{cellWidth:8}, 1:{cellWidth:45}, 2:{cellWidth:25} },
+      margin: { left: 14, right: 14 }
+    });
+  }
+
+  // Footer
+  const pageCount = pdf.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    pdf.setPage(i);
+    pdf.setFontSize(7); pdf.setTextColor(150,150,150);
+    pdf.text(`Page ${i} of ${pageCount}  |  School Transport System`, 297/2, 205, {align:'center'});
+  }
+
+  pdf.save(`transport_report_${currentScope}_${new Date().toISOString().slice(0,10)}.pdf`);
+  showToast('PDF downloaded!', 'success');
+};
+
+function showToast(msg, type='success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${{success:'✓',error:'✕',info:'ℹ'}[type]}</span>${msg}`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+</script>
+</body>
+</html>

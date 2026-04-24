@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Students — School Transport</title>
+<link rel="stylesheet" href="css/style.css">
+<!-- SheetJS for Excel import -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top-nav">
+  <div class="nav-brand">
+    <div class="logo-icon">🚌</div>
+    <span>School Transport</span>
+  </div>
+  <div class="nav-links">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="students.html" class="active">Students</a>
+    <a href="reports.html">Reports</a>
+  </div>
+  <div class="nav-user">
+    <div class="avatar" id="user-avatar">A</div>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Students</h1>
+      <p class="page-subtitle">Manage dispersal records by cycle, grade and section</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="openImportModal()">📥 Import Excel</button>
+      <button class="btn btn-primary" onclick="openAddModal()">+ Add Student</button>
+    </div>
+  </div>
+
+  <!-- Cycle Selector -->
+  <div class="cycle-selector" id="cycle-selector">
+    <div class="cycle-card" data-cycle="kindergarten" onclick="selectCycle('kindergarten')">
+      <div class="cycle-icon">🌱</div>
+      <div class="cycle-name">Kindergarten</div>
+      <div class="cycle-range">KG 1–2</div>
+    </div>
+    <div class="cycle-card" data-cycle="primary" onclick="selectCycle('primary')">
+      <div class="cycle-icon">📚</div>
+      <div class="cycle-name">Primary</div>
+      <div class="cycle-range">G 1–5</div>
+    </div>
+    <div class="cycle-card" data-cycle="middle" onclick="selectCycle('middle')">
+      <div class="cycle-icon">🏫</div>
+      <div class="cycle-name">Middle</div>
+      <div class="cycle-range">G 6–8</div>
+    </div>
+    <div class="cycle-card" data-cycle="higher" onclick="selectCycle('higher')">
+      <div class="cycle-icon">🎓</div>
+      <div class="cycle-name">Higher</div>
+      <div class="cycle-range">G 9–12</div>
+    </div>
+  </div>
+
+  <!-- Grade + Section filter (shown after cycle selected) -->
+  <div class="card" id="grade-section-panel" style="margin-bottom:1.5rem; display:none;">
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">Grade</div>
+      <div class="grade-tabs" id="grade-tabs"></div>
+    </div>
+    <div>
+      <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">Section</div>
+      <div class="section-pills" id="section-pills">
+        <div class="section-pill active" data-sec="ALL" onclick="selectSection('ALL')">All</div>
+        <div class="section-pill" data-sec="A" onclick="selectSection('A')">A</div>
+        <div class="section-pill" data-sec="B" onclick="selectSection('B')">B</div>
+        <div class="section-pill" data-sec="C" onclick="selectSection('C')">C</div>
+        <div class="section-pill" data-sec="D" onclick="selectSection('D')">D</div>
+        <div class="section-pill" data-sec="E" onclick="selectSection('E')">E</div>
+        <div class="section-pill" data-sec="F" onclick="selectSection('F')">F</div>
+        <div class="section-pill" data-sec="AB" onclick="selectSection('AB')">AB</div>
+        <div class="section-pill" data-sec="BB" onclick="selectSection('BB')">BB</div>
+        <div class="section-pill" data-sec="CB" onclick="selectSection('CB')">CB</div>
+        <div class="section-pill" data-sec="DB" onclick="selectSection('DB')">DB</div>
+        <div class="section-pill" data-sec="AG" onclick="selectSection('AG')">AG</div>
+        <div class="section-pill" data-sec="BG" onclick="selectSection('BG')">BG</div>
+        <div class="section-pill" data-sec="CG" onclick="selectSection('CG')">CG</div>
+        <div class="section-pill" data-sec="DG" onclick="selectSection('DG')">DG</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Students Table -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title"><div class="icon">👥</div> <span id="table-title">All Students</span></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="badge badge-blue" id="count-badge">0 students</span>
+      </div>
+    </div>
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="form-control" id="search-input" placeholder="Search name, ID…" oninput="renderTable()">
+      </div>
+      <select class="form-control" style="width:auto" id="filter-mode" onchange="renderTable()">
+        <option value="">All Modes</option>
+        <option>School Bus</option>
+        <option>Own Transport</option>
+        <option>By Walk</option>
+      </select>
+      <select class="form-control" style="width:auto" id="filter-sibling" onchange="renderTable()">
+        <option value="">All Siblings</option>
+        <option value="Yes">Has Sibling</option>
+        <option value="No">No Sibling</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table id="students-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student Name</th>
+            <th>Paradigm ID</th>
+            <th>Grade</th>
+            <th>Section</th>
+            <th>Dispersal Mode</th>
+            <th>Bus/Route</th>
+            <th>Pick-up Name</th>
+            <th>Parent Contact</th>
+            <th>Sibling</th>
+            <th>Walk Consent</th>
+            <th>Emergency</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="13" style="text-align:center; padding:2rem; color:var(--text-muted);">Select a cycle or load all students</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ======= ADD/EDIT MODAL ======= -->
+<div class="modal-overlay hidden" id="student-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">Add New Student</h2>
+      <button class="modal-close" onclick="closeStudentModal()">✕</button>
+    </div>
+    <div id="modal-alert"></div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Student Name *</label>
+        <input type="text" class="form-control" id="f-name" placeholder="Full name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Paradigm ID</label>
+        <input type="text" class="form-control" id="f-pid" placeholder="e.g. PAR-00123">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Class / Grade *</label>
+        <select class="form-control" id="f-grade">
+          <option value="">— Select Grade —</option>
+          <option>KG1</option><option>KG2</option>
+          <option>G1</option><option>G2</option><option>G3</option><option>G4</option><option>G5</option>
+          <option>G6</option><option>G7</option><option>G8</option>
+          <option>G9</option><option>G10</option><option>G11</option><option>G12</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Section *</label>
+        <select class="form-control" id="f-section">
+          <option value="">— Select Section —</option>
+          <option>A</option><option>B</option><option>C</option><option>D</option>
+          <option>E</option><option>F</option><option>AB</option><option>BB</option>
+          <option>CB</option><option>DB</option><option>AG</option><option>BG</option>
+          <option>CG</option><option>DG</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mode of Dispersal *</label>
+        <select class="form-control" id="f-mode">
+          <option value="">— Select Mode —</option>
+          <option>School Bus</option>
+          <option>Own Transport</option>
+          <option>By Walk</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bus No / Route</label>
+        <input type="text" class="form-control" id="f-bus" placeholder="e.g. Bus 7 / Route A">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Pick-up Name</label>
+        <select class="form-control" id="f-pickup">
+          <option value="">— Select —</option>
+          <option>Parent</option>
+          <option>Car Lift</option>
+          <option>Driver</option>
+          <option>Guardian</option>
+          <option>Sibling</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Parent Contact</label>
+        <input type="text" class="form-control" id="f-parent" placeholder="+971 50 000 0000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sibling (Yes/No)</label>
+        <select class="form-control" id="f-sibling">
+          <option value="">— Select —</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Walk Undertaking (Consent)</label>
+        <select class="form-control" id="f-consent">
+          <option value="">— Select —</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Emergency Contact</label>
+        <input type="text" class="form-control" id="f-emergency" placeholder="+971 50 000 0000">
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:1.5rem;">
+      <button class="btn btn-secondary" onclick="closeStudentModal()">Cancel</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveStudent()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======= IMPORT MODAL ======= -->
+<div class="modal-overlay hidden" id="import-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 class="modal-title">Import Students from Excel</h2>
+      <button class="modal-close" onclick="document.getElementById('import-modal').classList.add('hidden')">✕</button>
+    </div>
+    <div class="alert alert-info">
+      📋 Download the template first, fill it in, then upload. Columns must match exactly.
+    </div>
+    <button class="btn btn-secondary" style="margin-bottom:1rem;" onclick="downloadTemplate()">⬇ Download Excel Template</button>
+
+    <div class="import-zone" id="import-zone" onclick="document.getElementById('file-input').click()"
+         ondragover="event.preventDefault();this.classList.add('drag-over')"
+         ondragleave="this.classList.remove('drag-over')"
+         ondrop="handleDrop(event)">
+      <div class="import-icon">📂</div>
+      <p><strong>Click to browse</strong> or drag and drop your Excel file here</p>
+      <p style="font-size:0.78rem; margin-top:4px;">Supports .xlsx and .xls files</p>
+    </div>
+    <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="handleFileSelect(event)">
+
+    <div id="import-preview" style="margin-top:1rem; display:none;">
+      <div class="alert alert-success" id="import-count"></div>
+      <div class="table-wrap" style="max-height:250px; overflow-y:auto;">
+        <table id="preview-table">
+          <thead><tr id="preview-head"></tr></thead>
+          <tbody id="preview-body"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:1rem;">
+        <button class="btn btn-secondary" onclick="cancelImport()">Cancel</button>
+        <button class="btn btn-primary" id="confirm-import-btn" onclick="confirmImport()">Import All Records</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script type="module">
+import { db, auth, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onAuthStateChanged, signOut } from './js/firebase-config.js';
+import { Timestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const CYCLE_GRADES = {
+  kindergarten: ['KG1','KG2'],
+  primary: ['G1','G2','G3','G4','G5'],
+  middle: ['G6','G7','G8'],
+  higher: ['G9','G10','G11','G12']
+};
+const CYCLE_MAP = {
+  KG1:'kindergarten',KG2:'kindergarten',
+  G1:'primary',G2:'primary',G3:'primary',G4:'primary',G5:'primary',
+  G6:'middle',G7:'middle',G8:'middle',
+  G9:'higher',G10:'higher',G11:'higher',G12:'higher'
+};
+
+let allStudents = [];
+let filteredStudents = [];
+let activeCycle = null;
+let activeGrade = null;
+let activeSection = 'ALL';
+let editId = null;
+let importRows = [];
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  document.getElementById('user-avatar').textContent = user.email[0].toUpperCase();
+  await loadAllStudents();
+  renderTable();
+});
+
+window.doLogout = async () => { await signOut(auth); window.location.href = 'login.html'; };
+
+async function loadAllStudents() {
+  const snap = await getDocs(collection(db, 'students'));
+  allStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// ===== CYCLE / GRADE / SECTION =====
+window.selectCycle = function(cycle) {
+  activeCycle = cycle;
+  activeGrade = null;
+  activeSection = 'ALL';
+  document.querySelectorAll('.cycle-card').forEach(el => el.classList.toggle('active', el.dataset.cycle === cycle));
+  const panel = document.getElementById('grade-section-panel');
+  panel.style.display = 'block';
+
+  const grades = CYCLE_GRADES[cycle];
+  const tabs = document.getElementById('grade-tabs');
+  tabs.innerHTML = `<div class="grade-tab active" data-g="ALL" onclick="selectGrade('ALL')">All</div>` +
+    grades.map(g => `<div class="grade-tab" data-g="${g}" onclick="selectGrade('${g}')">${g}</div>`).join('');
+
+  document.getElementById('table-title').textContent = `${cycle.charAt(0).toUpperCase()+cycle.slice(1)} Students`;
+  resetSectionPills();
+  renderTable();
+};
+
+window.selectGrade = function(grade) {
+  activeGrade = grade === 'ALL' ? null : grade;
+  document.querySelectorAll('.grade-tab').forEach(el => el.classList.toggle('active', el.dataset.g === grade));
+  renderTable();
+};
+
+window.selectSection = function(sec) {
+  activeSection = sec;
+  document.querySelectorAll('.section-pill').forEach(el => el.classList.toggle('active', el.dataset.sec === sec));
+  renderTable();
+};
+
+function resetSectionPills() {
+  activeSection = 'ALL';
+  document.querySelectorAll('.section-pill').forEach(el => el.classList.toggle('active', el.dataset.sec === 'ALL'));
+}
+
+// ===== TABLE RENDER =====
+window.renderTable = function() {
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const modeFilter = document.getElementById('filter-mode').value;
+  const sibFilter = document.getElementById('filter-sibling').value;
+
+  filteredStudents = allStudents.filter(s => {
+    if (activeCycle && CYCLE_MAP[s.grade] !== activeCycle) return false;
+    if (activeGrade && s.grade !== activeGrade) return false;
+    if (activeSection !== 'ALL' && s.section !== activeSection) return false;
+    if (modeFilter && s.dispersalMode !== modeFilter) return false;
+    if (sibFilter && s.sibling !== sibFilter) return false;
+    if (search) {
+      const haystack = `${s.studentName} ${s.paradigmId} ${s.parentContact}`.toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('count-badge').textContent = `${filteredStudents.length} student${filteredStudents.length!==1?'s':''}`;
+
+  const tbody = document.getElementById('table-body');
+  if (!filteredStudents.length) {
+    tbody.innerHTML = `<tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📋</div><h3>No students found</h3><p>Try adjusting filters or add new students.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filteredStudents.map((s, i) => {
+    const modeCls = s.dispersalMode==='School Bus'?'badge-blue':s.dispersalMode==='Own Transport'?'badge-orange':'badge-green';
+    return `
+    <tr>
+      <td style="color:var(--text-muted);font-size:0.8rem">${i+1}</td>
+      <td style="font-weight:500">${s.studentName||'—'}</td>
+      <td style="font-size:0.85rem;color:var(--text-muted)">${s.paradigmId||'—'}</td>
+      <td><span class="badge badge-gray">${s.grade||'—'}</span></td>
+      <td>${s.section||'—'}</td>
+      <td><span class="badge ${modeCls}">${s.dispersalMode||'—'}</span></td>
+      <td style="font-size:0.85rem">${s.busRoute||'—'}</td>
+      <td style="font-size:0.85rem">${s.pickupName||'—'}</td>
+      <td style="font-size:0.85rem">${s.parentContact||'—'}</td>
+      <td>${s.sibling==='Yes'?'<span class="badge badge-green">Yes</span>':'<span class="badge badge-gray">No</span>'}</td>
+      <td>${s.walkUndertaking==='Yes'?'<span class="badge badge-green">Yes</span>':'<span class="badge badge-red">No</span>'}</td>
+      <td style="font-size:0.85rem">${s.emergencyContact||'—'}</td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick="openEditModal('${s.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" title="Delete" onclick="deleteStudent('${s.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+};
+
+// ===== ADD/EDIT MODAL =====
+window.openAddModal = function() {
+  editId = null;
+  document.getElementById('modal-title').textContent = 'Add New Student';
+  document.getElementById('save-btn').textContent = 'Save Student';
+  clearForm();
+  // Pre-fill grade/section from active filter
+  if (activeGrade) document.getElementById('f-grade').value = activeGrade;
+  if (activeSection !== 'ALL') document.getElementById('f-section').value = activeSection;
+  document.getElementById('modal-alert').innerHTML = '';
+  document.getElementById('student-modal').classList.remove('hidden');
+};
+
+window.openEditModal = function(id) {
+  const s = allStudents.find(st => st.id === id);
+  if (!s) return;
+  editId = id;
+  document.getElementById('modal-title').textContent = 'Edit Student';
+  document.getElementById('save-btn').textContent = 'Update Student';
+  document.getElementById('f-name').value = s.studentName||'';
+  document.getElementById('f-pid').value = s.paradigmId||'';
+  document.getElementById('f-grade').value = s.grade||'';
+  document.getElementById('f-section').value = s.section||'';
+  document.getElementById('f-mode').value = s.dispersalMode||'';
+  document.getElementById('f-bus').value = s.busRoute||'';
+  document.getElementById('f-pickup').value = s.pickupName||'';
+  document.getElementById('f-parent').value = s.parentContact||'';
+  document.getElementById('f-sibling').value = s.sibling||'';
+  document.getElementById('f-consent').value = s.walkUndertaking||'';
+  document.getElementById('f-emergency').value = s.emergencyContact||'';
+  document.getElementById('modal-alert').innerHTML = '';
+  document.getElementById('student-modal').classList.remove('hidden');
+};
+
+window.closeStudentModal = function() {
+  document.getElementById('student-modal').classList.add('hidden');
+};
+
+function clearForm() {
+  ['f-name','f-pid','f-grade','f-section','f-mode','f-bus','f-pickup','f-parent','f-sibling','f-consent','f-emergency']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+
+window.saveStudent = async function() {
+  const name = document.getElementById('f-name').value.trim();
+  const grade = document.getElementById('f-grade').value;
+  const section = document.getElementById('f-section').value;
+  const mode = document.getElementById('f-mode').value;
+
+  if (!name || !grade || !section || !mode) {
+    document.getElementById('modal-alert').innerHTML = '<div class="alert alert-error">Please fill all required fields (Name, Grade, Section, Mode).</div>';
+    return;
+  }
+
+  const data = {
+    studentName: name,
+    paradigmId: document.getElementById('f-pid').value.trim(),
+    grade, section,
+    cycle: CYCLE_MAP[grade] || 'unknown',
+    dispersalMode: mode,
+    busRoute: document.getElementById('f-bus').value.trim(),
+    pickupName: document.getElementById('f-pickup').value,
+    parentContact: document.getElementById('f-parent').value.trim(),
+    sibling: document.getElementById('f-sibling').value,
+    walkUndertaking: document.getElementById('f-consent').value,
+    emergencyContact: document.getElementById('f-emergency').value.trim(),
+    updatedAt: new Date()
+  };
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    if (editId) {
+      await updateDoc(doc(db, 'students', editId), data);
+      const idx = allStudents.findIndex(s => s.id === editId);
+      if (idx >= 0) allStudents[idx] = { id: editId, ...data };
+      showToast('Student updated successfully!', 'success');
+    } else {
+      data.createdAt = new Date();
+      const ref = await addDoc(collection(db, 'students'), data);
+      allStudents.push({ id: ref.id, ...data });
+      showToast('Student added successfully!', 'success');
+    }
+    closeStudentModal();
+    renderTable();
+  } catch(e) {
+    document.getElementById('modal-alert').innerHTML = `<div class="alert alert-error">Error: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = editId ? 'Update Student' : 'Save Student';
+  }
+};
+
+window.deleteStudent = async function(id) {
+  if (!confirm('Delete this student record? This cannot be undone.')) return;
+  try {
+    await deleteDoc(doc(db, 'students', id));
+    allStudents = allStudents.filter(s => s.id !== id);
+    showToast('Student deleted.', 'info');
+    renderTable();
+  } catch(e) {
+    showToast('Delete failed: ' + e.message, 'error');
+  }
+};
+
+// ===== IMPORT EXCEL =====
+window.openImportModal = function() {
+  importRows = [];
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  document.getElementById('import-modal').classList.remove('hidden');
+};
+
+window.downloadTemplate = function() {
+  const headers = ['studentName','paradigmId','grade','section','dispersalMode','busRoute','pickupName','parentContact','sibling','walkUndertaking','emergencyContact'];
+  const sample = ['Ahmed Al Rashid','PAR-00001','G5','A','School Bus','Bus 3','Parent','+971501234567','Yes','No','+971502345678'];
+  const ws = XLSX.utils.aoa_to_sheet([headers, sample]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Students');
+  XLSX.writeFile(wb, 'student_import_template.xlsx');
+};
+
+window.handleDrop = function(e) {
+  e.preventDefault();
+  document.getElementById('import-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) processExcelFile(file);
+};
+
+window.handleFileSelect = function(e) {
+  const file = e.target.files[0];
+  if (file) processExcelFile(file);
+};
+
+function processExcelFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const wb = XLSX.read(e.target.result, { type: 'binary' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    if (!data.length) { showToast('No data found in file.', 'error'); return; }
+    importRows = data.map(row => ({
+      studentName: String(row.studentName||row['Student Name']||'').trim(),
+      paradigmId: String(row.paradigmId||row['Paradigm ID']||'').trim(),
+      grade: String(row.grade||row['Grade']||row['Class']||'').trim(),
+      section: String(row.section||row['Section']||'').trim(),
+      dispersalMode: String(row.dispersalMode||row['Mode of Dispersal']||'').trim(),
+      busRoute: String(row.busRoute||row['Bus No/Route']||'').trim(),
+      pickupName: String(row.pickupName||row['Pick-up Name']||'').trim(),
+      parentContact: String(row.parentContact||row['Parent Contact']||'').trim(),
+      sibling: String(row.sibling||row['Sibling']||'').trim(),
+      walkUndertaking: String(row.walkUndertaking||row['Walk Undertaking (Yes/No)']||'').trim(),
+      emergencyContact: String(row.emergencyContact||row['Emergency Contact']||'').trim(),
+    }));
+    showImportPreview();
+  };
+  reader.readAsBinaryString(file);
+}
+
+function showImportPreview() {
+  const cols = ['studentName','grade','section','dispersalMode','sibling','walkUndertaking'];
+  const head = document.getElementById('preview-head');
+  const body = document.getElementById('preview-body');
+  head.innerHTML = cols.map(c => `<th>${c}</th>`).join('');
+  body.innerHTML = importRows.slice(0,10).map(r =>
+    `<tr>${cols.map(c => `<td style="font-size:0.8rem">${r[c]||'—'}</td>`).join('')}</tr>`
+  ).join('');
+  document.getElementById('import-count').textContent = `✓ ${importRows.length} records ready to import (showing first 10)`;
+  document.getElementById('import-preview').style.display = 'block';
+}
+
+window.cancelImport = function() {
+  importRows = [];
+  document.getElementById('import-preview').style.display = 'none';
+  document.getElementById('file-input').value = '';
+};
+
+window.confirmImport = async function() {
+  if (!importRows.length) return;
+  const btn = document.getElementById('confirm-import-btn');
+  btn.disabled = true;
+  btn.textContent = 'Importing…';
+  let success = 0, errors = 0;
+  for (const row of importRows) {
+    if (!row.studentName || !row.grade) { errors++; continue; }
+    try {
+      const data = { ...row, cycle: CYCLE_MAP[row.grade]||'unknown', createdAt: new Date(), updatedAt: new Date() };
+      const ref = await addDoc(collection(db, 'students'), data);
+      allStudents.push({ id: ref.id, ...data });
+      success++;
+    } catch(e) { errors++; }
+  }
+  showToast(`Imported ${success} students${errors?`, ${errors} errors`:''}`, 'success');
+  document.getElementById('import-modal').classList.add('hidden');
+  importRows = [];
+  renderTable();
+  btn.disabled = false;
+  btn.textContent = 'Import All Records';
+};
+
+// ===== TOAST =====
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${icons[type]}</span>${msg}`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+</script>
+</body>
+</html>
