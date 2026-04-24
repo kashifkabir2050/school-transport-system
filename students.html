@@ -67,27 +67,27 @@
   <!-- Grade + Section filter (shown after cycle selected) -->
   <div class="card" id="grade-section-panel" style="margin-bottom:1.5rem; display:none;">
     <div style="margin-bottom:1rem;">
-      <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">Grade</div>
+      <div style="font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Grade</div>
       <div class="grade-tabs" id="grade-tabs"></div>
     </div>
     <div>
-      <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:8px;">Section</div>
+      <div style="font-size:0.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Section</div>
       <div class="section-pills" id="section-pills">
-        <div class="section-pill active" data-sec="ALL" onclick="selectSection('ALL')">All</div>
-        <div class="section-pill" data-sec="A" onclick="selectSection('A')">A</div>
-        <div class="section-pill" data-sec="B" onclick="selectSection('B')">B</div>
-        <div class="section-pill" data-sec="C" onclick="selectSection('C')">C</div>
-        <div class="section-pill" data-sec="D" onclick="selectSection('D')">D</div>
-        <div class="section-pill" data-sec="E" onclick="selectSection('E')">E</div>
-        <div class="section-pill" data-sec="F" onclick="selectSection('F')">F</div>
-        <div class="section-pill" data-sec="AB" onclick="selectSection('AB')">AB</div>
-        <div class="section-pill" data-sec="BB" onclick="selectSection('BB')">BB</div>
-        <div class="section-pill" data-sec="CB" onclick="selectSection('CB')">CB</div>
-        <div class="section-pill" data-sec="DB" onclick="selectSection('DB')">DB</div>
-        <div class="section-pill" data-sec="AG" onclick="selectSection('AG')">AG</div>
-        <div class="section-pill" data-sec="BG" onclick="selectSection('BG')">BG</div>
-        <div class="section-pill" data-sec="CG" onclick="selectSection('CG')">CG</div>
-        <div class="section-pill" data-sec="DG" onclick="selectSection('DG')">DG</div>
+        <div class="section-pill active" data-sec="ALL"  onclick="selectSection('ALL')">All</div>
+        <div class="section-pill" data-sec="A"   onclick="selectSection('A')">A</div>
+        <div class="section-pill" data-sec="B"   onclick="selectSection('B')">B</div>
+        <div class="section-pill" data-sec="C"   onclick="selectSection('C')">C</div>
+        <div class="section-pill" data-sec="D"   onclick="selectSection('D')">D</div>
+        <div class="section-pill" data-sec="E"   onclick="selectSection('E')">E</div>
+        <div class="section-pill" data-sec="F"   onclick="selectSection('F')">F</div>
+        <div class="section-pill" data-sec="AB"  onclick="selectSection('AB')">AB</div>
+        <div class="section-pill" data-sec="BB"  onclick="selectSection('BB')">BB</div>
+        <div class="section-pill" data-sec="CB"  onclick="selectSection('CB')">CB</div>
+        <div class="section-pill" data-sec="DB"  onclick="selectSection('DB')">DB</div>
+        <div class="section-pill" data-sec="AG"  onclick="selectSection('AG')">AG</div>
+        <div class="section-pill" data-sec="BG"  onclick="selectSection('BG')">BG</div>
+        <div class="section-pill" data-sec="CG"  onclick="selectSection('CG')">CG</div>
+        <div class="section-pill" data-sec="DG"  onclick="selectSection('DG')">DG</div>
       </div>
     </div>
   </div>
@@ -104,7 +104,8 @@
     <div class="filter-bar">
       <div class="search-box">
         <span class="search-icon">🔍</span>
-        <input type="text" class="form-control" id="search-input" placeholder="Search name, ID…" oninput="renderTable()">
+        <input type="text" class="form-control" id="search-input"
+               placeholder="Search name, ID…" oninput="renderTable()">
       </div>
       <select class="form-control" style="width:auto" id="filter-mode" onchange="renderTable()">
         <option value="">All Modes</option>
@@ -139,7 +140,7 @@
           </tr>
         </thead>
         <tbody id="table-body">
-          <tr><td colspan="13" style="text-align:center; padding:2rem; color:var(--text-muted);">Select a cycle or load all students</td></tr>
+          <tr><td colspan="13" style="text-align:center;padding:2rem;color:var(--text-muted);">Select a cycle or load all students</td></tr>
         </tbody>
       </table>
     </div>
@@ -168,7 +169,8 @@
         <select class="form-control" id="f-grade">
           <option value="">— Select Grade —</option>
           <option>KG1</option><option>KG2</option>
-          <option>G1</option><option>G2</option><option>G3</option><option>G4</option><option>G5</option>
+          <option>G1</option><option>G2</option><option>G3</option>
+          <option>G4</option><option>G5</option>
           <option>G6</option><option>G7</option><option>G8</option>
           <option>G9</option><option>G10</option><option>G11</option><option>G12</option>
         </select>
@@ -200,12 +202,8 @@
         <label class="form-label">Pick-up Name</label>
         <select class="form-control" id="f-pickup">
           <option value="">— Select —</option>
-          <option>Parent</option>
-          <option>Car Lift</option>
-          <option>Driver</option>
-          <option>Guardian</option>
-          <option>Sibling</option>
-          <option>Other</option>
+          <option>Parent</option><option>Car Lift</option><option>Driver</option>
+          <option>Guardian</option><option>Sibling</option><option>Other</option>
         </select>
       </div>
       <div class="form-group">
@@ -216,16 +214,14 @@
         <label class="form-label">Sibling (Yes/No)</label>
         <select class="form-control" id="f-sibling">
           <option value="">— Select —</option>
-          <option>Yes</option>
-          <option>No</option>
+          <option>Yes</option><option>No</option>
         </select>
       </div>
       <div class="form-group">
         <label class="form-label">Walk Undertaking (Consent)</label>
         <select class="form-control" id="f-consent">
           <option value="">— Select —</option>
-          <option>Yes</option>
-          <option>No</option>
+          <option>Yes</option><option>No</option>
         </select>
       </div>
       <div class="form-group">
@@ -252,19 +248,21 @@
     </div>
     <button class="btn btn-secondary" style="margin-bottom:1rem;" onclick="downloadTemplate()">⬇ Download Excel Template</button>
 
-    <div class="import-zone" id="import-zone" onclick="document.getElementById('file-input').click()"
+    <div class="import-zone" id="import-zone"
+         onclick="document.getElementById('file-input').click()"
          ondragover="event.preventDefault();this.classList.add('drag-over')"
          ondragleave="this.classList.remove('drag-over')"
          ondrop="handleDrop(event)">
       <div class="import-icon">📂</div>
       <p><strong>Click to browse</strong> or drag and drop your Excel file here</p>
-      <p style="font-size:0.78rem; margin-top:4px;">Supports .xlsx and .xls files</p>
+      <p style="font-size:0.78rem;margin-top:4px;">Supports .xlsx and .xls files</p>
     </div>
-    <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none" onchange="handleFileSelect(event)">
+    <input type="file" id="file-input" accept=".xlsx,.xls"
+           style="display:none" onchange="handleFileSelect(event)">
 
-    <div id="import-preview" style="margin-top:1rem; display:none;">
+    <div id="import-preview" style="margin-top:1rem;display:none;">
       <div class="alert alert-success" id="import-count"></div>
-      <div class="table-wrap" style="max-height:250px; overflow-y:auto;">
+      <div class="table-wrap" style="max-height:250px;overflow-y:auto;">
         <table id="preview-table">
           <thead><tr id="preview-head"></tr></thead>
           <tbody id="preview-body"></tbody>
@@ -281,29 +279,32 @@
 <div id="toast-container"></div>
 
 <script type="module">
-import { db, auth, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onAuthStateChanged, signOut } from './js/firebase-config.js';
-import { Timestamp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+// ── Fixed: correct import path, removed broken Timestamp import ──
+import {
+  db, auth, collection, addDoc, getDocs, updateDoc,
+  deleteDoc, doc, onAuthStateChanged, signOut
+} from './js/firebase-config.js';
 
 const CYCLE_GRADES = {
   kindergarten: ['KG1','KG2'],
-  primary: ['G1','G2','G3','G4','G5'],
-  middle: ['G6','G7','G8'],
-  higher: ['G9','G10','G11','G12']
+  primary:      ['G1','G2','G3','G4','G5'],
+  middle:       ['G6','G7','G8'],
+  higher:       ['G9','G10','G11','G12']
 };
 const CYCLE_MAP = {
-  KG1:'kindergarten',KG2:'kindergarten',
-  G1:'primary',G2:'primary',G3:'primary',G4:'primary',G5:'primary',
-  G6:'middle',G7:'middle',G8:'middle',
-  G9:'higher',G10:'higher',G11:'higher',G12:'higher'
+  KG1:'kindergarten', KG2:'kindergarten',
+  G1:'primary',  G2:'primary',  G3:'primary',  G4:'primary',  G5:'primary',
+  G6:'middle',   G7:'middle',   G8:'middle',
+  G9:'higher',   G10:'higher',  G11:'higher',  G12:'higher'
 };
 
-let allStudents = [];
+let allStudents    = [];
 let filteredStudents = [];
-let activeCycle = null;
-let activeGrade = null;
-let activeSection = 'ALL';
-let editId = null;
-let importRows = [];
+let activeCycle    = null;
+let activeGrade    = null;
+let activeSection  = 'ALL';
+let editId         = null;
+let importRows     = [];
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = 'login.html'; return; }
@@ -321,45 +322,50 @@ async function loadAllStudents() {
 
 // ===== CYCLE / GRADE / SECTION =====
 window.selectCycle = function(cycle) {
-  activeCycle = cycle;
-  activeGrade = null;
+  activeCycle   = cycle;
+  activeGrade   = null;
   activeSection = 'ALL';
-  document.querySelectorAll('.cycle-card').forEach(el => el.classList.toggle('active', el.dataset.cycle === cycle));
-  const panel = document.getElementById('grade-section-panel');
-  panel.style.display = 'block';
+  document.querySelectorAll('.cycle-card').forEach(el =>
+    el.classList.toggle('active', el.dataset.cycle === cycle));
+  document.getElementById('grade-section-panel').style.display = 'block';
 
   const grades = CYCLE_GRADES[cycle];
-  const tabs = document.getElementById('grade-tabs');
-  tabs.innerHTML = `<div class="grade-tab active" data-g="ALL" onclick="selectGrade('ALL')">All</div>` +
+  const tabs   = document.getElementById('grade-tabs');
+  tabs.innerHTML =
+    `<div class="grade-tab active" data-g="ALL" onclick="selectGrade('ALL')">All</div>` +
     grades.map(g => `<div class="grade-tab" data-g="${g}" onclick="selectGrade('${g}')">${g}</div>`).join('');
 
-  document.getElementById('table-title').textContent = `${cycle.charAt(0).toUpperCase()+cycle.slice(1)} Students`;
+  document.getElementById('table-title').textContent =
+    cycle.charAt(0).toUpperCase() + cycle.slice(1) + ' Students';
   resetSectionPills();
   renderTable();
 };
 
 window.selectGrade = function(grade) {
   activeGrade = grade === 'ALL' ? null : grade;
-  document.querySelectorAll('.grade-tab').forEach(el => el.classList.toggle('active', el.dataset.g === grade));
+  document.querySelectorAll('.grade-tab').forEach(el =>
+    el.classList.toggle('active', el.dataset.g === grade));
   renderTable();
 };
 
 window.selectSection = function(sec) {
   activeSection = sec;
-  document.querySelectorAll('.section-pill').forEach(el => el.classList.toggle('active', el.dataset.sec === sec));
+  document.querySelectorAll('.section-pill').forEach(el =>
+    el.classList.toggle('active', el.dataset.sec === sec));
   renderTable();
 };
 
 function resetSectionPills() {
   activeSection = 'ALL';
-  document.querySelectorAll('.section-pill').forEach(el => el.classList.toggle('active', el.dataset.sec === 'ALL'));
+  document.querySelectorAll('.section-pill').forEach(el =>
+    el.classList.toggle('active', el.dataset.sec === 'ALL'));
 }
 
 // ===== TABLE RENDER =====
 window.renderTable = function() {
-  const search = document.getElementById('search-input').value.toLowerCase();
+  const search    = document.getElementById('search-input').value.toLowerCase();
   const modeFilter = document.getElementById('filter-mode').value;
-  const sibFilter = document.getElementById('filter-sibling').value;
+  const sibFilter  = document.getElementById('filter-sibling').value;
 
   filteredStudents = allStudents.filter(s => {
     if (activeCycle && CYCLE_MAP[s.grade] !== activeCycle) return false;
@@ -368,40 +374,52 @@ window.renderTable = function() {
     if (modeFilter && s.dispersalMode !== modeFilter) return false;
     if (sibFilter && s.sibling !== sibFilter) return false;
     if (search) {
-      const haystack = `${s.studentName} ${s.paradigmId} ${s.parentContact}`.toLowerCase();
-      if (!haystack.includes(search)) return false;
+      const hay = `${s.studentName} ${s.paradigmId} ${s.parentContact}`.toLowerCase();
+      if (!hay.includes(search)) return false;
     }
     return true;
   });
 
-  document.getElementById('count-badge').textContent = `${filteredStudents.length} student${filteredStudents.length!==1?'s':''}`;
+  document.getElementById('count-badge').textContent =
+    `${filteredStudents.length} student${filteredStudents.length !== 1 ? 's' : ''}`;
 
   const tbody = document.getElementById('table-body');
   if (!filteredStudents.length) {
-    tbody.innerHTML = `<tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📋</div><h3>No students found</h3><p>Try adjusting filters or add new students.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="13"><div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No students found</h3>
+      <p>Try adjusting filters or add new students.</p>
+    </div></td></tr>`;
     return;
   }
 
   tbody.innerHTML = filteredStudents.map((s, i) => {
-    const modeCls = s.dispersalMode==='School Bus'?'badge-blue':s.dispersalMode==='Own Transport'?'badge-orange':'badge-green';
+    const modeCls = s.dispersalMode === 'School Bus'    ? 'badge-blue'   :
+                    s.dispersalMode === 'Own Transport' ? 'badge-orange' : 'badge-green';
     return `
     <tr>
-      <td style="color:var(--text-muted);font-size:0.8rem">${i+1}</td>
-      <td style="font-weight:500">${s.studentName||'—'}</td>
-      <td style="font-size:0.85rem;color:var(--text-muted)">${s.paradigmId||'—'}</td>
-      <td><span class="badge badge-gray">${s.grade||'—'}</span></td>
-      <td>${s.section||'—'}</td>
-      <td><span class="badge ${modeCls}">${s.dispersalMode||'—'}</span></td>
-      <td style="font-size:0.85rem">${s.busRoute||'—'}</td>
-      <td style="font-size:0.85rem">${s.pickupName||'—'}</td>
-      <td style="font-size:0.85rem">${s.parentContact||'—'}</td>
-      <td>${s.sibling==='Yes'?'<span class="badge badge-green">Yes</span>':'<span class="badge badge-gray">No</span>'}</td>
-      <td>${s.walkUndertaking==='Yes'?'<span class="badge badge-green">Yes</span>':'<span class="badge badge-red">No</span>'}</td>
-      <td style="font-size:0.85rem">${s.emergencyContact||'—'}</td>
+      <td style="color:var(--text-muted);font-size:0.8rem">${i + 1}</td>
+      <td style="font-weight:500">${s.studentName || '—'}</td>
+      <td style="font-size:0.85rem;color:var(--text-muted)">${s.paradigmId || '—'}</td>
+      <td><span class="badge badge-gray">${s.grade || '—'}</span></td>
+      <td>${s.section || '—'}</td>
+      <td><span class="badge ${modeCls}">${s.dispersalMode || '—'}</span></td>
+      <td style="font-size:0.85rem">${s.busRoute || '—'}</td>
+      <td style="font-size:0.85rem">${s.pickupName || '—'}</td>
+      <td style="font-size:0.85rem">${s.parentContact || '—'}</td>
+      <td>${s.sibling === 'Yes'
+        ? '<span class="badge badge-green">Yes</span>'
+        : '<span class="badge badge-gray">No</span>'}</td>
+      <td>${s.walkUndertaking === 'Yes'
+        ? '<span class="badge badge-green">Yes</span>'
+        : '<span class="badge badge-red">No</span>'}</td>
+      <td style="font-size:0.85rem">${s.emergencyContact || '—'}</td>
       <td>
         <div style="display:flex;gap:4px">
-          <button class="btn btn-secondary btn-sm btn-icon" title="Edit" onclick="openEditModal('${s.id}')">✏️</button>
-          <button class="btn btn-danger btn-sm btn-icon" title="Delete" onclick="deleteStudent('${s.id}')">🗑️</button>
+          <button class="btn btn-secondary btn-sm btn-icon" title="Edit"
+                  onclick="openEditModal('${s.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm btn-icon" title="Delete"
+                  onclick="deleteStudent('${s.id}')">🗑️</button>
         </div>
       </td>
     </tr>`;
@@ -412,10 +430,9 @@ window.renderTable = function() {
 window.openAddModal = function() {
   editId = null;
   document.getElementById('modal-title').textContent = 'Add New Student';
-  document.getElementById('save-btn').textContent = 'Save Student';
+  document.getElementById('save-btn').textContent    = 'Save Student';
   clearForm();
-  // Pre-fill grade/section from active filter
-  if (activeGrade) document.getElementById('f-grade').value = activeGrade;
+  if (activeGrade)           document.getElementById('f-grade').value   = activeGrade;
   if (activeSection !== 'ALL') document.getElementById('f-section').value = activeSection;
   document.getElementById('modal-alert').innerHTML = '';
   document.getElementById('student-modal').classList.remove('hidden');
@@ -426,18 +443,18 @@ window.openEditModal = function(id) {
   if (!s) return;
   editId = id;
   document.getElementById('modal-title').textContent = 'Edit Student';
-  document.getElementById('save-btn').textContent = 'Update Student';
-  document.getElementById('f-name').value = s.studentName||'';
-  document.getElementById('f-pid').value = s.paradigmId||'';
-  document.getElementById('f-grade').value = s.grade||'';
-  document.getElementById('f-section').value = s.section||'';
-  document.getElementById('f-mode').value = s.dispersalMode||'';
-  document.getElementById('f-bus').value = s.busRoute||'';
-  document.getElementById('f-pickup').value = s.pickupName||'';
-  document.getElementById('f-parent').value = s.parentContact||'';
-  document.getElementById('f-sibling').value = s.sibling||'';
-  document.getElementById('f-consent').value = s.walkUndertaking||'';
-  document.getElementById('f-emergency').value = s.emergencyContact||'';
+  document.getElementById('save-btn').textContent    = 'Update Student';
+  document.getElementById('f-name').value      = s.studentName  || '';
+  document.getElementById('f-pid').value       = s.paradigmId   || '';
+  document.getElementById('f-grade').value     = s.grade        || '';
+  document.getElementById('f-section').value   = s.section      || '';
+  document.getElementById('f-mode').value      = s.dispersalMode|| '';
+  document.getElementById('f-bus').value       = s.busRoute     || '';
+  document.getElementById('f-pickup').value    = s.pickupName   || '';
+  document.getElementById('f-parent').value    = s.parentContact|| '';
+  document.getElementById('f-sibling').value   = s.sibling      || '';
+  document.getElementById('f-consent').value   = s.walkUndertaking || '';
+  document.getElementById('f-emergency').value = s.emergencyContact || '';
   document.getElementById('modal-alert').innerHTML = '';
   document.getElementById('student-modal').classList.remove('hidden');
 };
@@ -447,34 +464,36 @@ window.closeStudentModal = function() {
 };
 
 function clearForm() {
-  ['f-name','f-pid','f-grade','f-section','f-mode','f-bus','f-pickup','f-parent','f-sibling','f-consent','f-emergency']
+  ['f-name','f-pid','f-grade','f-section','f-mode','f-bus',
+   'f-pickup','f-parent','f-sibling','f-consent','f-emergency']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 }
 
 window.saveStudent = async function() {
-  const name = document.getElementById('f-name').value.trim();
-  const grade = document.getElementById('f-grade').value;
+  const name    = document.getElementById('f-name').value.trim();
+  const grade   = document.getElementById('f-grade').value;
   const section = document.getElementById('f-section').value;
-  const mode = document.getElementById('f-mode').value;
+  const mode    = document.getElementById('f-mode').value;
 
   if (!name || !grade || !section || !mode) {
-    document.getElementById('modal-alert').innerHTML = '<div class="alert alert-error">Please fill all required fields (Name, Grade, Section, Mode).</div>';
+    document.getElementById('modal-alert').innerHTML =
+      '<div class="alert alert-error">Please fill all required fields (Name, Grade, Section, Mode).</div>';
     return;
   }
 
   const data = {
-    studentName: name,
-    paradigmId: document.getElementById('f-pid').value.trim(),
+    studentName:      name,
+    paradigmId:       document.getElementById('f-pid').value.trim(),
     grade, section,
-    cycle: CYCLE_MAP[grade] || 'unknown',
-    dispersalMode: mode,
-    busRoute: document.getElementById('f-bus').value.trim(),
-    pickupName: document.getElementById('f-pickup').value,
-    parentContact: document.getElementById('f-parent').value.trim(),
-    sibling: document.getElementById('f-sibling').value,
-    walkUndertaking: document.getElementById('f-consent').value,
+    cycle:            CYCLE_MAP[grade] || 'unknown',
+    dispersalMode:    mode,
+    busRoute:         document.getElementById('f-bus').value.trim(),
+    pickupName:       document.getElementById('f-pickup').value,
+    parentContact:    document.getElementById('f-parent').value.trim(),
+    sibling:          document.getElementById('f-sibling').value,
+    walkUndertaking:  document.getElementById('f-consent').value,
     emergencyContact: document.getElementById('f-emergency').value.trim(),
-    updatedAt: new Date()
+    updatedAt:        new Date()
   };
 
   const btn = document.getElementById('save-btn');
@@ -495,10 +514,11 @@ window.saveStudent = async function() {
     }
     closeStudentModal();
     renderTable();
-  } catch(e) {
-    document.getElementById('modal-alert').innerHTML = `<div class="alert alert-error">Error: ${e.message}</div>`;
+  } catch (e) {
+    document.getElementById('modal-alert').innerHTML =
+      `<div class="alert alert-error">Error: ${e.message}</div>`;
   } finally {
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = editId ? 'Update Student' : 'Save Student';
   }
 };
@@ -510,7 +530,7 @@ window.deleteStudent = async function(id) {
     allStudents = allStudents.filter(s => s.id !== id);
     showToast('Student deleted.', 'info');
     renderTable();
-  } catch(e) {
+  } catch (e) {
     showToast('Delete failed: ' + e.message, 'error');
   }
 };
@@ -524,9 +544,16 @@ window.openImportModal = function() {
 };
 
 window.downloadTemplate = function() {
-  const headers = ['studentName','paradigmId','grade','section','dispersalMode','busRoute','pickupName','parentContact','sibling','walkUndertaking','emergencyContact'];
-  const sample = ['Ahmed Al Rashid','PAR-00001','G5','A','School Bus','Bus 3','Parent','+971501234567','Yes','No','+971502345678'];
+  const headers = [
+    'studentName','paradigmId','grade','section','dispersalMode',
+    'busRoute','pickupName','parentContact','sibling','walkUndertaking','emergencyContact'
+  ];
+  const sample = [
+    'Ahmed Al Rashid','PAR-00001','G5','A','School Bus',
+    'Bus 3','Parent','+971501234567','Yes','No','+971502345678'
+  ];
   const ws = XLSX.utils.aoa_to_sheet([headers, sample]);
+  ws['!cols'] = headers.map(() => ({ wch: 22 }));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Students');
   XLSX.writeFile(wb, 'student_import_template.xlsx');
@@ -547,22 +574,22 @@ window.handleFileSelect = function(e) {
 function processExcelFile(file) {
   const reader = new FileReader();
   reader.onload = function(e) {
-    const wb = XLSX.read(e.target.result, { type: 'binary' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
+    const wb   = XLSX.read(e.target.result, { type: 'binary' });
+    const ws   = wb.Sheets[wb.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
     if (!data.length) { showToast('No data found in file.', 'error'); return; }
     importRows = data.map(row => ({
-      studentName: String(row.studentName||row['Student Name']||'').trim(),
-      paradigmId: String(row.paradigmId||row['Paradigm ID']||'').trim(),
-      grade: String(row.grade||row['Grade']||row['Class']||'').trim(),
-      section: String(row.section||row['Section']||'').trim(),
-      dispersalMode: String(row.dispersalMode||row['Mode of Dispersal']||'').trim(),
-      busRoute: String(row.busRoute||row['Bus No/Route']||'').trim(),
-      pickupName: String(row.pickupName||row['Pick-up Name']||'').trim(),
-      parentContact: String(row.parentContact||row['Parent Contact']||'').trim(),
-      sibling: String(row.sibling||row['Sibling']||'').trim(),
-      walkUndertaking: String(row.walkUndertaking||row['Walk Undertaking (Yes/No)']||'').trim(),
-      emergencyContact: String(row.emergencyContact||row['Emergency Contact']||'').trim(),
+      studentName:      String(row.studentName      || row['Student Name']           || '').trim(),
+      paradigmId:       String(row.paradigmId       || row['Paradigm ID']            || '').trim(),
+      grade:            String(row.grade            || row['Grade'] || row['Class']  || '').trim(),
+      section:          String(row.section          || row['Section']                || '').trim(),
+      dispersalMode:    String(row.dispersalMode    || row['Mode of Dispersal']      || '').trim(),
+      busRoute:         String(row.busRoute         || row['Bus No/Route']           || '').trim(),
+      pickupName:       String(row.pickupName       || row['Pick-up Name']           || '').trim(),
+      parentContact:    String(row.parentContact    || row['Parent Contact']         || '').trim(),
+      sibling:          String(row.sibling          || row['Sibling']                || '').trim(),
+      walkUndertaking:  String(row.walkUndertaking  || row['Walk Undertaking (Yes/No)'] || '').trim(),
+      emergencyContact: String(row.emergencyContact || row['Emergency Contact']      || '').trim(),
     }));
     showImportPreview();
   };
@@ -571,13 +598,12 @@ function processExcelFile(file) {
 
 function showImportPreview() {
   const cols = ['studentName','grade','section','dispersalMode','sibling','walkUndertaking'];
-  const head = document.getElementById('preview-head');
-  const body = document.getElementById('preview-body');
-  head.innerHTML = cols.map(c => `<th>${c}</th>`).join('');
-  body.innerHTML = importRows.slice(0,10).map(r =>
-    `<tr>${cols.map(c => `<td style="font-size:0.8rem">${r[c]||'—'}</td>`).join('')}</tr>`
+  document.getElementById('preview-head').innerHTML = cols.map(c => `<th>${c}</th>`).join('');
+  document.getElementById('preview-body').innerHTML = importRows.slice(0, 10).map(r =>
+    `<tr>${cols.map(c => `<td style="font-size:0.8rem">${r[c] || '—'}</td>`).join('')}</tr>`
   ).join('');
-  document.getElementById('import-count').textContent = `✓ ${importRows.length} records ready to import (showing first 10)`;
+  document.getElementById('import-count').textContent =
+    `✓ ${importRows.length} records ready to import (showing first 10)`;
   document.getElementById('import-preview').style.display = 'block';
 }
 
@@ -590,31 +616,31 @@ window.cancelImport = function() {
 window.confirmImport = async function() {
   if (!importRows.length) return;
   const btn = document.getElementById('confirm-import-btn');
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = 'Importing…';
   let success = 0, errors = 0;
   for (const row of importRows) {
     if (!row.studentName || !row.grade) { errors++; continue; }
     try {
-      const data = { ...row, cycle: CYCLE_MAP[row.grade]||'unknown', createdAt: new Date(), updatedAt: new Date() };
-      const ref = await addDoc(collection(db, 'students'), data);
+      const data = { ...row, cycle: CYCLE_MAP[row.grade] || 'unknown', createdAt: new Date(), updatedAt: new Date() };
+      const ref  = await addDoc(collection(db, 'students'), data);
       allStudents.push({ id: ref.id, ...data });
       success++;
-    } catch(e) { errors++; }
+    } catch (e) { errors++; }
   }
-  showToast(`Imported ${success} students${errors?`, ${errors} errors`:''}`, 'success');
+  showToast(`Imported ${success} students${errors ? `, ${errors} errors` : ''}`, 'success');
   document.getElementById('import-modal').classList.add('hidden');
   importRows = [];
   renderTable();
-  btn.disabled = false;
+  btn.disabled    = false;
   btn.textContent = 'Import All Records';
 };
 
 // ===== TOAST =====
 function showToast(msg, type = 'success') {
-  const c = document.getElementById('toast-container');
+  const c    = document.getElementById('toast-container');
   const icons = { success: '✓', error: '✕', info: 'ℹ' };
-  const t = document.createElement('div');
+  const t    = document.createElement('div');
   t.className = `toast ${type}`;
   t.innerHTML = `<span>${icons[type]}</span>${msg}`;
   c.appendChild(t);
